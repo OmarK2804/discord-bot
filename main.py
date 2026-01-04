@@ -35,24 +35,18 @@ def get_new_articles():
 		entries = feedparser.parse(rss_feed["url"]).entries
 		for entry in entries:
 			if not article_in_db(entry):
-				pub_date = datetime.strptime(entry.published, "%a, %d %b %Y %H:%M:%S %z").replace(tzinfo=timezone.utc)
+				pub_date = pub_date = datetime(*entry.published_parsed[:6], tzinfo=timezone.utc)
 				if datetime.now(timezone.utc) - pub_date <= timedelta(days=LAST_ARTICLE_RANGE):
-					new_articles.append({"article": entry, "user": rss_feed["user"], "feedTitle": feedparser.parse(rss_feed["url"]).feed.title})
+					new_articles.append({"article": entry})
 
 	return new_articles
 
 
 def format_to_message(article):
 	article_title = article["article"].title
-	article_user = article["user"]
-	article_feed_title = article["feedTitle"]
 	article_link = article["article"].link
 
-	message = f"**{article_title}** by "
-	if article_user:
-		message += f"<@{article_user}>"
-	else:
-		message += f"{article_feed_title}"
+	message = f"**{article_title}**"
 	message += f"\n{article_link}"
 
 	return message

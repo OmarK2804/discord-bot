@@ -3,11 +3,17 @@ from datetime import datetime, timedelta, timezone
 import sqlite3
 import discord
 from discord.ext import commands, tasks
+import os
 
 from config import TOKEN, CHANNEL_ID, UPDATE_INTERVAL, LAST_ARTICLE_RANGE, RSS_FEEDS
 
+# Path inside container
+DB_PATH = os.getenv("DATABASE_PATH", "data/articles.db")
 
-connection = sqlite3.connect('articles.db')
+# Ensure the folder exists
+os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+
+connection = sqlite3.connect(DB_PATH)
 c = connection.cursor()
 c.execute('''CREATE TABLE IF NOT EXISTS articles (title TEXT, link TEXT)''')
 connection.commit()
